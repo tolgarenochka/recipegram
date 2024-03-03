@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+#  auth:
+#    build:
+#      context: ./services/auth   # путь к директории с Dockerfile для сервиса auth
+#    ports:
+#      - "8000:8000"  # Замените на необходимый порт для сервиса auth
+#    depends_on:
+#      - postgres
+#      - kafka
+
+  guiapi:
+    build:
+      context: ./services/guiapi  # путь к директории с Dockerfile для сервиса guiapi
+    ports:
+      - "8080:8080"  # Замените на необходимый порт для сервиса guiapi
+    depends_on:
+#      - auth
+      - kafka
+
+#  recipe:
+#    build:
+#      context: ./services/recipe  # путь к директории с Dockerfile для сервиса recipe
+#    ports:
+#      - "9000:9000"  # Замените на необходимый порт для сервиса recipe
+#    depends_on:
+#      - postgres
+#      - kafka
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1q2w3e4r5t
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/:/docker-entrypoint-initdb.d
+
+  kafka:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
