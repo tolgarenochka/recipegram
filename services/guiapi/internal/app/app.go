@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	dbwizard "github.com/tolgarenochka/recipegram/dbwizard"
 	"guiapi/internal/server"
 	"log"
 	"os/signal"
@@ -14,6 +15,16 @@ func Run() {
 
 	s := server.NewServer()
 	s.Init()
+
+	dbWizard, err := dbwizard.NewConnect()
+	if err != nil {
+		log.Fatal("Database wizard init failed. Reason:", err)
+	}
+	defer func() {
+		if err = dbWizard.Quit(); err != nil {
+			logger.Fatal(err.Error())
+		}
+	}()
 
 	err := s.Run(ctx)
 	if err != nil {
