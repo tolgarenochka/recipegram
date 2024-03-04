@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 type Store struct {
@@ -13,7 +13,7 @@ type Store struct {
 }
 
 func NewConnect() (*Store, error) {
-	conn, err := sqlx.ConnectContext(context.Background(), "pgx", "postgresql://localhost:5432/recipegram")
+	conn, err := sqlx.ConnectContext(context.Background(), "postgres", "postgresql://localhost:5432/recipegram")
 	if err != nil {
 		log.Println("Error while db connecting:", err)
 		return nil, err
