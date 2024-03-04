@@ -13,7 +13,7 @@ type Store struct {
 }
 
 func NewConnect() (*Store, error) {
-	conn, err := sqlx.ConnectContext(context.Background(), "postgres", "postgresql://localhost:5432/recipegram")
+	conn, err := sqlx.ConnectContext(context.Background(), "postgres", "postgres://postgres:1q2w3e4r5t@postgres:5432/recipegram?sslmode=disable")
 	if err != nil {
 		log.Println("Error while db connecting:", err)
 		return nil, err
