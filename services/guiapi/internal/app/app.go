@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	db "github.com/tolgarenochka/recipegram/db/dbwizard"
+	"github.com/tolgarenochka/recipegram/db/dbwizard"
 	"guiapi/internal/server"
 	"log"
 	"os/signal"
@@ -13,16 +13,18 @@ func Run() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
 
+	log.Println("Init service guiapi...")
+
 	s := server.NewServer()
 	s.Init()
 
-	dbWizard, err := db.NewConnect()
+	dbWizard, err := dbwizard.NewConnect()
 	if err != nil {
 		log.Fatal("Database wizard init failed. Reason:", err)
 	}
 	defer func() {
 		if err = dbWizard.Quit(); err != nil {
-			logger.Fatal(err.Error())
+			log.Fatal("Error while db connecting:", err)
 		}
 	}()
 
