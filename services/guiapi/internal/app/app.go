@@ -2,7 +2,8 @@ package app
 
 import (
 	"context"
-	"guiapi/internal/dbwizard"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"guiapi/internal/server"
 	"log"
 	"os/signal"
@@ -18,13 +19,14 @@ func Run() {
 	s := server.NewServer()
 	s.Init()
 
-	dbWizard, err := dbwizard.NewConnect()
+	dbWizard, err := sqlx.ConnectContext(context.Background(), "postgres", "postgres://postgres:1q2w3e4r5t@postgres:5432/recipegram?sslmode=disable")
 	if err != nil {
 		log.Fatal("Database wizard init failed. Reason:", err)
 	}
+
 	defer func() {
-		if err = dbWizard.Quit(); err != nil {
-			log.Fatal("Error while db connecting:", err)
+		if err = dbWizard.Close(); err != nil {
+			log.Fatal("Error close db connecting:", err)
 		}
 	}()
 
