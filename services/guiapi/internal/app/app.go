@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	dbwizard "github.com/tolgarenochka/recipegram/dbwizard"
+	"github.com/tolgarenochka/recipegram/db/dbwizard"
 	"guiapi/internal/server"
 	"log"
 	"os/signal"

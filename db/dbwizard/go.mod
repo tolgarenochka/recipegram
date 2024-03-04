@@ -1,4 +1,4 @@
-module dbwizard
+module github.com/tolgarenochka/recipegram/db/dbwizard
 
 go 1.21.3
 
