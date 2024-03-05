@@ -14,8 +14,8 @@ func (s *Server) initRouter() *router.Router {
 	r.POST("/reg", c.CorsMiddleware(s.reg))
 
 	r.POST("/addRecipe", c.CorsMiddleware(s.addRecipe))
-	r.POST("/editRecipe", c.CorsMiddleware(s.editRecipe))
-	r.DELETE("/deleteRecipe", c.CorsMiddleware(s.deleteRecipe))
+	r.POST("/editRecipe/{recipeID}", c.CorsMiddleware(s.editRecipe))
+	r.DELETE("/deleteRecipe/{recipeID}", c.CorsMiddleware(s.deleteRecipe))
 
 	r.POST("/getRecipe", c.CorsMiddleware(s.getRecipe))
 	r.POST("/getRecipesList", c.CorsMiddleware(s.getRecipesList))

@@ -1,6 +1,8 @@
 package server
 
 import (
+	"encoding/json"
+	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 )
@@ -30,6 +32,66 @@ func (d *dbWiz) reg(username, email string, hashedPassword []byte) error {
 		username, email, hashedPassword)
 	if err != nil {
 		log.Printf("Error inserting user into the database: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
+func (d *dbWiz) addRecipe(recipeData *Recipe, userID int) error {
+	// Преобразование массива ингредиентов в формат PostgreSQL
+	ingredientsArray := pq.Array(recipeData.Ingredients)
+
+	stepsJSON, err := json.Marshal(recipeData.Steps)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Вставка рецепта в базу данных
+	_, err = d.dbWizard.Exec("INSERT INTO recipes (title, description, user_id, ingredients, steps) VALUES ($1, $2, $3, $4, $5)",
+		recipeData.Title, recipeData.Description, userID, ingredientsArray, stepsJSON)
+	if err != nil {
+		log.Printf("Error inserting recipe into the database: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
+func (d *dbWiz) getUserIdFromRecipeId(recipeID int) (int, error) {
+	var ownerID int
+	err := d.dbWizard.QueryRow("SELECT user_id FROM recipes WHERE recipe_id = $1", recipeID).Scan(&ownerID)
+	if err != nil {
+		log.Printf("Error checking recipe ownership: %v\n", err)
+		return 0, err
+	}
+
+	return ownerID, nil
+}
+
+func (d *dbWiz) updateRecipe(recipeData *Recipe, recipeID int) error {
+	// Преобразование массива ингредиентов в формат PostgreSQL
+	ingredientsArray := pq.Array(recipeData.Ingredients)
+
+	stepsJSON, err := json.Marshal(recipeData.Steps)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = d.dbWizard.Exec("UPDATE recipes SET title = $1, description = $2, ingredients = $3, steps = $4 WHERE recipe_id = $5",
+		recipeData.Title, recipeData.Description, ingredientsArray, stepsJSON, recipeID)
+	if err != nil {
+		log.Printf("Error updating recipe in the database: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
+func (d *dbWiz) deleteRecipe(recipeID int) error {
+	_, err := d.dbWizard.Exec("DELETE FROM recipes WHERE recipe_id = $1", recipeID)
+	if err != nil {
+		log.Printf("Error deleting recipe from the database: %v\n", err)
 		return err
 	}
 

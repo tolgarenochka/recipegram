@@ -9,6 +9,7 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.9
 	github.com/valyala/fasthttp v1.52.0
+	github.com/valyala/fasthttprouter v0.0.0-20160217050331-24073dd8f323
 	golang.org/x/crypto v0.19.0
 	golang.org/x/sync v0.6.0
 )
