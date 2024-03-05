@@ -1,22 +1,24 @@
 create database recipegram
     with owner postgres;
 
-create sequence public.table_id_seq;
+\c recipegram;
 
-create table public."user"
-(
-    id          integer default nextval('table_id_seq'::regclass)           not null,
-    mail        text                                                        not null,
-    pas         text                                                        not null,
-    photo       varchar default 'user_photo/default.png'::character varying not null,
-    first_name  text                                                        not null,
-    second_name text                                                        not null,
-    third_name  text
+CREATE TABLE users (
+                       user_id SERIAL PRIMARY KEY,
+                       username VARCHAR(255) NOT NULL,
+                       email VARCHAR(255) NOT NULL UNIQUE,
+                       password_hash VARCHAR(255) NOT NULL
 );
 
-alter table public."user"
-    add constraint user_id
-        primary key (id);
+-- Создание таблицы рецептов
+CREATE TABLE recipes (
+                         recipe_id SERIAL PRIMARY KEY,
+                         title VARCHAR(255) NOT NULL,
+                         description TEXT,
+                         user_id INTEGER REFERENCES users(user_id) NOT NULL,
+                         ingredients TEXT[] NOT NULL,
+                         steps JSONB
+);
 
 
 

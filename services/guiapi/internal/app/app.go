@@ -16,9 +16,6 @@ func Run() {
 
 	log.Println("Init service guiapi...")
 
-	s := server.NewServer()
-	s.Init()
-
 	dbWizard, err := sqlx.ConnectContext(context.Background(), "postgres", "postgres://postgres:1q2w3e4r5t@postgres:5432/recipegram?sslmode=disable")
 	if err != nil {
 		log.Fatal("Database wizard init failed. Reason:", err)
@@ -29,6 +26,9 @@ func Run() {
 			log.Fatal("Error close db connecting:", err)
 		}
 	}()
+
+	s := server.NewServer()
+	s.Init(dbWizard)
 
 	err = s.Run(ctx)
 	if err != nil {

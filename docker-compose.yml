@@ -9,6 +9,15 @@ services:
 #    depends_on:
 #      - postgres
 #      - kafka
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1q2w3e4r5t
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d
 
   guiapi:
     build:
@@ -27,16 +36,6 @@ services:
 #    depends_on:
 #      - postgres
 #      - kafka
-
-  postgres:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1q2w3e4r5t
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./db/init:/docker-entrypoint-initdb.d
 
   kafka:
     image: wurstmeister/kafka:latest
