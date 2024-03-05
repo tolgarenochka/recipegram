@@ -262,7 +262,40 @@ func (s *Server) deleteRecipe(ctx *fasthttp.RequestCtx) { // Проверка в
 }
 
 func (s *Server) getRecipe(ctx *fasthttp.RequestCtx) {
+	_, _, err := validateToken(ctx)
+	if err != nil {
+		log.Printf("Error validating token: %v\n", err)
+		ctx.Error("Unauthorized", fasthttp.StatusUnauthorized)
+		return
+	}
 
+	// Получение ID рецепта из пути запроса (/deleteRecipe/{recipeID})
+	recipeID, err := strconv.Atoi(ctx.UserValue("recipeID").(string))
+	if err != nil {
+		log.Printf("Error parsing recipeID: %v\n", err)
+		ctx.Error("Bad Request", fasthttp.StatusBadRequest)
+		return
+	}
+
+	// Запрос к базе данных для получения рецепта
+	recipe, err := s.dbWizard.getRecipeById(recipeID)
+	if err != nil {
+		ctx.Error("Internal Server Error", fasthttp.StatusInternalServerError)
+		return
+	}
+
+	// Преобразование рецепта в JSON
+	jsonResponse, err := json.Marshal(recipe)
+	if err != nil {
+		log.Printf("Error encoding recipe to JSON: %v\n", err)
+		ctx.Error("Internal Server Error", fasthttp.StatusInternalServerError)
+		return
+	}
+
+	// Успешное получение рецепта
+	ctx.Response.SetStatusCode(fasthttp.StatusOK)
+	ctx.Response.Header.Set("Content-Type", "application/json")
+	ctx.Write(jsonResponse)
 }
 
 func (s *Server) getRecipesList(ctx *fasthttp.RequestCtx) {

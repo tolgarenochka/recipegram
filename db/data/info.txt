@@ -1,0 +1,5 @@
+there is postgres information in the "postgres-data"
+
+you can add it to .gitignore file
+
+if you want to fill your db with new data - just delete the "postgres-data" - it will be rewrite

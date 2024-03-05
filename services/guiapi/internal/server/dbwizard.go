@@ -97,3 +97,30 @@ func (d *dbWiz) deleteRecipe(recipeID int) error {
 
 	return nil
 }
+
+func (d *dbWiz) getRecipeById(recipeID int) (Recipe, error) {
+	var recipe Recipe
+	var stepsString string
+
+	err := d.dbWizard.QueryRow("SELECT title, description, ingredients, steps FROM recipes WHERE recipe_id = $1", recipeID).
+		Scan(&recipe.Title, &recipe.Description, pq.Array(&recipe.Ingredients), &stepsString)
+	if err != nil {
+		log.Printf("Error getting recipe from the database: %v\n", err)
+		return recipe, err
+	}
+
+	var steps []struct {
+		Step        int    `json:"step"`
+		Instruction string `json:"instruction"`
+	}
+
+	if err = json.Unmarshal([]byte(stepsString), &steps); err != nil {
+		log.Printf("Error decoding steps from JSON: %v\n", err)
+		return recipe, err
+	}
+
+	// Присвоение структуры шагов рецепта
+	recipe.Steps = steps
+
+	return recipe, nil
+}
