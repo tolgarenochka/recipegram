@@ -23,4 +23,5 @@ recipegram - социальная сеть для рецептов
 3) Docker-compose
 
 Архитектура приложения:
+
 ![img_1.png](img_1.png)
