@@ -2,25 +2,27 @@ FROM golang:alpine AS builder
 
 LABEL stage=gobuilder
 
-ENV CGO_ENABLED 0
-
-RUN apk update --no-cache && apk add --no-cache tzdata
+RUN apk update
+RUN apk add \
+    gcc \
+    musl-dev \
+    # explicitly install SASL package
+    cyrus-sasl-dev
 
 WORKDIR /build
 
 ADD go.mod .
 ADD go.sum .
 RUN go mod download
+
+ENV CGO_ENABLED 1
+ENV GO111MODULE=on
+ENV CGO_LDFLAGS="-lsasl2"
+
 COPY . .
-RUN go build -ldflags="-s -w" -o /app/guiapi cmd/guiapi.go
 
-
-FROM scratch
-
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=builder /usr/share/zoneinfo/Asia/Shanghai /usr/share/zoneinfo/Asia/Shanghai
+RUN go build -tags musl -ldflags="-s -w" -o /app/guiapi cmd/guiapi.go
 
 WORKDIR /app
-COPY --from=builder /app/guiapi /app/guiapi
 
 CMD ["./guiapi"]

@@ -28,7 +28,7 @@ func Run() {
 		}
 	}()
 
-	broker := "kafka:9093"
+	broker := "kafka:9092"
 	//topic := "your_topic_name"
 
 	// Настройка продюсера

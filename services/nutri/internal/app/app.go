@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"log"
@@ -29,7 +28,7 @@ func Run() {
 	}()
 
 	// Адрес и порт брокера Kafka
-	broker := "kafka:9093"
+	broker := "kafka:9092"
 	topic := "count"
 	groupID := "unique_group_id"
 
@@ -43,16 +42,16 @@ func Run() {
 	// Подписка на топик
 	err = cons.SubscribeTopic(topic)
 	if err != nil {
-		fmt.Printf("Failed to subscribe to topic: %v\n", err)
+		log.Printf("Failed to subscribe to topic: %v\n", err)
 	}
 
 	// Чтение сообщений
 	for {
 		msg, err := cons.Consumer.ReadMessage(-1)
 		if err == nil {
-			fmt.Printf("Received message: %s\n", msg.Value)
+			log.Printf("Received message: %s\n", msg.Value)
 		} else {
-			fmt.Printf("Error reading message: %v\n", err)
+			log.Printf("Error reading message: %v\n", err)
 		}
 	}
 

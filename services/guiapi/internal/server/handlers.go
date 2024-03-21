@@ -133,7 +133,8 @@ type Recipe struct {
 	} `json:"steps"`
 }
 
-func (s *Server) addRecipe(ctx *fasthttp.RequestCtx) { // Проверка валидности токена
+func (s *Server) addRecipe(ctx *fasthttp.RequestCtx) {
+	// Проверка валидности токена
 	userID, _, err := validateToken(ctx)
 	if err != nil {
 		log.Printf("Error validating token: %v\n", err)
@@ -157,6 +158,11 @@ func (s *Server) addRecipe(ctx *fasthttp.RequestCtx) { // Проверка ва�
 	}
 
 	err = s.sendMessageKafka("count", []byte("work pls"))
+	if err != nil {
+		log.Printf("Error while sending Kafka message: %s", err.Error())
+		ctx.Error("Internal Server Error", fasthttp.StatusInternalServerError)
+		return
+	}
 
 	// Успешное добавление рецепта
 	ctx.Response.SetStatusCode(fasthttp.StatusCreated)
