@@ -156,6 +156,8 @@ func (s *Server) addRecipe(ctx *fasthttp.RequestCtx) { // Проверка ва�
 		return
 	}
 
+	err = s.sendMessageKafka("count", []byte("work pls"))
+
 	// Успешное добавление рецепта
 	ctx.Response.SetStatusCode(fasthttp.StatusCreated)
 	ctx.Response.Header.Set("Content-Type", "application/json")

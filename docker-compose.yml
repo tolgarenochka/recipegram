@@ -1,14 +1,6 @@
 version: '3.8'
 
 services:
-#  auth:
-#    build:
-#      context: ./services/auth   # путь к директории с Dockerfile для сервиса auth
-#    ports:
-#      - "8000:8000"  # Замените на необходимый порт для сервиса auth
-#    depends_on:
-#      - postgres
-#      - kafka
   postgres:
     image: postgres:latest
     environment:
@@ -19,25 +11,6 @@ services:
     volumes:
       - ./db/init:/docker-entrypoint-initdb.d
       - ./db/data/postgres-data:/var/lib/postgresql/data
-
-  guiapi:
-    build:
-      context: ./services/guiapi  # путь к директории с Dockerfile для сервиса guiapi
-    ports:
-      - "8080:8080"  # Замените на необходимый порт для сервиса guiapi
-    depends_on:
-      - postgres
-#      - auth
-      - kafka
-
-#  recipe:
-#    build:
-#      context: ./services/recipe  # путь к директории с Dockerfile для сервиса recipe
-#    ports:
-#      - "9000:9000"  # Замените на необходимый порт для сервиса recipe
-#    depends_on:
-#      - postgres
-#      - kafka
 
   kafka:
     image: wurstmeister/kafka:latest
@@ -51,3 +24,22 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+  guiapi:
+    build:
+      context: ./services/guiapi
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - kafka
+
+  nutri:
+    build:
+      context: ./services/nutri
+    ports:
+      - "8070:8070"
+    depends_on:
+      - postgres
+      - kafka
+      - guiapi

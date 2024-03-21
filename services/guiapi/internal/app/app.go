@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"guiapi/internal/server"
@@ -27,8 +28,18 @@ func Run() {
 		}
 	}()
 
+	broker := "kafka:9093"
+	//topic := "your_topic_name"
+
+	// Настройка продюсера
+	producer, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})
+	if err != nil {
+		log.Fatal("Kafka producer init failed. Reason:", err)
+	}
+	defer producer.Close()
+
 	s := server.NewServer()
-	s.Init(dbWizard)
+	s.Init(dbWizard, producer)
 
 	err = s.Run(ctx)
 	if err != nil {

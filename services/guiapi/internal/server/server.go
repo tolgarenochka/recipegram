@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/fasthttp/router"
 	"github.com/jmoiron/sqlx"
 	http "github.com/valyala/fasthttp"
@@ -9,24 +10,25 @@ import (
 )
 
 type Server struct {
-	eg  *errgroup.Group
-	ctx context.Context
-
+	eg       *errgroup.Group
+	ctx      context.Context
 	router   *router.Router
 	server   *HTTPServer
 	dbWizard dbWiz
+	producer *kafka.Producer
 }
 
 type dbWiz struct {
 	dbWizard *sqlx.DB
 }
 
-func (s *Server) Init(dbW *sqlx.DB) {
+func (s *Server) Init(dbW *sqlx.DB, producer *kafka.Producer) {
 	s.router = s.initRouter()
 	s.server.serverHTTP.Handler = s.router.Handler
 	s.dbWizard = dbWiz{
 		dbWizard: dbW,
 	}
+	s.producer = producer
 }
 
 type HTTPServer struct {
