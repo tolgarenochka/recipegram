@@ -29,8 +29,7 @@ func Run() {
 
 	// Адрес и порт брокера Kafka
 	broker := "kafka:9092"
-	topic := "count"
-	groupID := "unique_group_id"
+	groupID := "group_id"
 
 	cons, err := consumer.InitKafkaConsumer(broker, groupID)
 	if err != nil {
@@ -39,21 +38,26 @@ func Run() {
 
 	defer cons.Consumer.Close()
 
+	topic := "count"
+
 	// Подписка на топик
 	err = cons.SubscribeTopic(topic)
 	if err != nil {
 		log.Printf("Failed to subscribe to topic: %v\n", err)
 	}
-
 	// Чтение сообщений
 	for {
-		msg, err := cons.Consumer.ReadMessage(-1)
-		if err == nil {
-			log.Printf("Received message: %s\n", msg.Value)
-		} else {
-			log.Printf("Error reading message: %v\n", err)
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			msg, err := cons.Consumer.ReadMessage(-1)
+			if err == nil {
+				log.Printf("Received message: %s\n", msg.Value)
+			} else {
+				log.Printf("Error reading message: %v\n", err)
+			}
 		}
 	}
 
-	ctx.Done()
 }

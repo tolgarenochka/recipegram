@@ -29,7 +29,6 @@ func Run() {
 	}()
 
 	broker := "kafka:9092"
-	//topic := "your_topic_name"
 
 	// Настройка продюсера
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})

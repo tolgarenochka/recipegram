@@ -11,7 +11,7 @@ func InitKafkaConsumer(broker, group string) (*Cons, error) {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": broker,
 		"group.id":          group,
-		"auto.offset.reset": "earliest",
+		"auto.offset.reset": "smallest",
 	})
 
 	return &Cons{consumer}, err
