@@ -157,7 +157,7 @@ func (s *Server) addRecipe(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	err = s.sendMessageKafka("count", []byte("work pls"))
+	err = s.sendMessageKafka("count", "work pls")
 	if err != nil {
 		log.Printf("Error while sending Kafka message: %s", err.Error())
 		ctx.Error("Internal Server Error", fasthttp.StatusInternalServerError)

@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
+	"github.com/IBM/sarama"
 	"github.com/fasthttp/router"
 	"github.com/jmoiron/sqlx"
 	http "github.com/valyala/fasthttp"
@@ -15,14 +15,14 @@ type Server struct {
 	router   *router.Router
 	server   *HTTPServer
 	dbWizard dbWiz
-	producer *kafka.Producer
+	producer sarama.SyncProducer
 }
 
 type dbWiz struct {
 	dbWizard *sqlx.DB
 }
 
-func (s *Server) Init(dbW *sqlx.DB, producer *kafka.Producer) {
+func (s *Server) Init(dbW *sqlx.DB, producer sarama.SyncProducer) {
 	s.router = s.initRouter()
 	s.server.serverHTTP.Handler = s.router.Handler
 	s.dbWizard = dbWiz{

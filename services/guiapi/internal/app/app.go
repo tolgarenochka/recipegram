@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
+	"github.com/IBM/sarama"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"guiapi/internal/server"
@@ -30,8 +30,11 @@ func Run() {
 
 	broker := "kafka:9092"
 
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+
 	// Настройка продюсера
-	producer, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})
+	producer, err := sarama.NewSyncProducer([]string{broker}, config)
 	if err != nil {
 		log.Fatal("Kafka producer init failed. Reason:", err)
 	}

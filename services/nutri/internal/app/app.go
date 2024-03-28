@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"log"
@@ -51,10 +52,10 @@ func Run() {
 		case <-ctx.Done():
 			return
 		default:
-			msg, err := cons.Consumer.ReadMessage(-1)
+			msg, err := cons.Consumer.ReadMessage(100)
 			if err == nil {
-				log.Printf("Received message: %s\n", msg.Value)
-			} else {
+				log.Printf("Received message: %s\n", msg.String())
+			} else if !err.(kafka.Error).IsTimeout() {
 				log.Printf("Error reading message: %v\n", err)
 			}
 		}
