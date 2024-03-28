@@ -2,11 +2,10 @@ package app
 
 import (
 	"context"
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
+	"github.com/IBM/sarama"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"log"
-	"nutri/internal/consumer"
 	"os/signal"
 	"syscall"
 )
@@ -30,34 +29,37 @@ func Run() {
 
 	// Адрес и порт брокера Kafka
 	broker := "kafka:9092"
-	groupID := "group_id"
+	//groupID := "group_id"
 
-	cons, err := consumer.InitKafkaConsumer(broker, groupID)
+	// Настройка консьюмера
+	config := sarama.NewConfig()
+	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
+	config.Consumer.Offsets.Initial = sarama.OffsetOldest
+
+	cons, err := sarama.NewConsumer([]string{broker}, config)
 	if err != nil {
 		log.Fatal("Can't init Kafka consumer. Reason: ", err)
 	}
-
-	defer cons.Consumer.Close()
+	defer cons.Close()
 
 	topic := "count"
 
 	// Подписка на топик
-	err = cons.SubscribeTopic(topic)
+	partitionConsumer, err := cons.ConsumePartition(topic, 0, sarama.OffsetNewest)
 	if err != nil {
 		log.Printf("Failed to subscribe to topic: %v\n", err)
 	}
+	defer partitionConsumer.Close()
+
 	// Чтение сообщений
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		default:
-			msg, err := cons.Consumer.ReadMessage(100)
-			if err == nil {
-				log.Printf("Received message: %s\n", msg.String())
-			} else if !err.(kafka.Error).IsTimeout() {
-				log.Printf("Error reading message: %v\n", err)
-			}
+		case msg := <-partitionConsumer.Messages():
+			log.Printf("Received message: %s\n", string(msg.Value))
+		case err := <-partitionConsumer.Errors():
+			log.Printf("Error reading message: %v\n", err)
 		}
 	}
 
