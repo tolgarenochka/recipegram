@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"log"
+	"nutri/internal/server"
 	"os/signal"
 	"syscall"
 )
@@ -42,25 +43,10 @@ func Run() {
 	}
 	defer cons.Close()
 
-	topic := "count"
-
-	// Подписка на топик
-	partitionConsumer, err := cons.ConsumePartition(topic, 0, sarama.OffsetNewest)
+	s := server.Init(dbWizard, cons)
+	err = s.Run(ctx)
 	if err != nil {
-		log.Printf("Failed to subscribe to topic: %v\n", err)
-	}
-	defer partitionConsumer.Close()
-
-	// Чтение сообщений
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case msg := <-partitionConsumer.Messages():
-			log.Printf("Received message: %s\n", string(msg.Value))
-		case err := <-partitionConsumer.Errors():
-			log.Printf("Error reading message: %v\n", err)
-		}
+		log.Fatal(err)
 	}
 
 }
