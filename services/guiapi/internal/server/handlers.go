@@ -122,15 +122,22 @@ func validateToken(ctx *fasthttp.RequestCtx) (int, string, error) {
 	return claims.UserID, claims.Username, nil
 }
 
+type Ingredient struct {
+	Name   string  `json:"name"`
+	Weight float64 `json:"weight"`
+}
+
+type Step struct {
+	Step        int    `json:"step"`
+	Instruction string `json:"instruction"`
+}
+
 // Recipe структура для представления данных рецепта
 type Recipe struct {
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	Ingredients []string `json:"ingredients"`
-	Steps       []struct {
-		Step        int    `json:"step"`
-		Instruction string `json:"instruction"`
-	} `json:"steps"`
+	Title       string       `json:"title"`
+	Description string       `json:"description"`
+	Ingredients []Ingredient `json:"ingredients"`
+	Steps       []Step       `json:"steps"`
 }
 
 func (s *Server) addRecipe(ctx *fasthttp.RequestCtx) {
@@ -151,13 +158,13 @@ func (s *Server) addRecipe(ctx *fasthttp.RequestCtx) {
 	}
 
 	// Вставка рецепта в базу данных
-	err = s.dbWizard.addRecipe(&recipeData, userID)
+	id, err := s.dbWizard.addRecipe(&recipeData, userID)
 	if err != nil {
 		ctx.Error("Internal Server Error", fasthttp.StatusInternalServerError)
 		return
 	}
 
-	err = s.sendMessageKafka("count", "work pls")
+	err = s.sendMessageKafka("count", strconv.Itoa(id))
 	if err != nil {
 		log.Printf("Error while sending Kafka message: %s", err.Error())
 		ctx.Error("Internal Server Error", fasthttp.StatusInternalServerError)
@@ -213,6 +220,13 @@ func (s *Server) editRecipe(ctx *fasthttp.RequestCtx) {
 	// Обновление данных рецепта в базе данных
 	err = s.dbWizard.updateRecipe(&recipeData, recipeID)
 	if err != nil {
+		ctx.Error("Internal Server Error", fasthttp.StatusInternalServerError)
+		return
+	}
+
+	err = s.sendMessageKafka("count", strconv.Itoa(recipeID))
+	if err != nil {
+		log.Printf("Error while sending Kafka message: %s", err.Error())
 		ctx.Error("Internal Server Error", fasthttp.StatusInternalServerError)
 		return
 	}

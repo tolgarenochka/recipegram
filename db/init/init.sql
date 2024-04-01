@@ -15,8 +15,8 @@ CREATE TABLE recipes (
                          recipe_id SERIAL PRIMARY KEY,
                          title VARCHAR(255) NOT NULL,
                          description TEXT,
-                         user_id INTEGER REFERENCES users(user_id) NOT NULL,
-                         ingredients TEXT[] NOT NULL,
+                         user_id INT NOT NULL,
+                         ingredients JSONB,
                          steps JSONB
 );
 

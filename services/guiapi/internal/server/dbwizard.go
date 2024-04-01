@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 )
@@ -38,24 +37,29 @@ func (d *dbWiz) reg(username, email string, hashedPassword []byte) error {
 	return nil
 }
 
-func (d *dbWiz) addRecipe(recipeData *Recipe, userID int) error {
-	// Преобразование массива ингредиентов в формат PostgreSQL
-	ingredientsArray := pq.Array(recipeData.Ingredients)
+func (d *dbWiz) addRecipe(recipeData *Recipe, userID int) (int, error) {
+	// Преобразование списка ингредиентов в формат JSON
+	ingredientsJSON, err := json.Marshal(recipeData.Ingredients)
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	// Преобразование списка шагов в формат JSON
 	stepsJSON, err := json.Marshal(recipeData.Steps)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	var id int
 	// Вставка рецепта в базу данных
-	_, err = d.dbWizard.Exec("INSERT INTO recipes (title, description, user_id, ingredients, steps) VALUES ($1, $2, $3, $4, $5)",
-		recipeData.Title, recipeData.Description, userID, ingredientsArray, stepsJSON)
+	err = d.dbWizard.QueryRow("INSERT INTO recipes (title, description, user_id, ingredients, steps) VALUES ($1, $2, $3, $4, $5) RETURNING recipe_id",
+		recipeData.Title, recipeData.Description, userID, ingredientsJSON, stepsJSON).Scan(&id)
 	if err != nil {
 		log.Printf("Error inserting recipe into the database: %v\n", err)
-		return err
+		return 0, err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (d *dbWiz) getUserIdFromRecipeId(recipeID int) (int, error) {
@@ -70,16 +74,20 @@ func (d *dbWiz) getUserIdFromRecipeId(recipeID int) (int, error) {
 }
 
 func (d *dbWiz) updateRecipe(recipeData *Recipe, recipeID int) error {
-	// Преобразование массива ингредиентов в формат PostgreSQL
-	ingredientsArray := pq.Array(recipeData.Ingredients)
+	// Преобразование списка ингредиентов в формат JSON
+	ingredientsJSON, err := json.Marshal(recipeData.Ingredients)
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	// Преобразование списка шагов в формат JSON
 	stepsJSON, err := json.Marshal(recipeData.Steps)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	_, err = d.dbWizard.Exec("UPDATE recipes SET title = $1, description = $2, ingredients = $3, steps = $4 WHERE recipe_id = $5",
-		recipeData.Title, recipeData.Description, ingredientsArray, stepsJSON, recipeID)
+		recipeData.Title, recipeData.Description, ingredientsJSON, stepsJSON, recipeID)
 	if err != nil {
 		log.Printf("Error updating recipe in the database: %v\n", err)
 		return err
@@ -100,27 +108,27 @@ func (d *dbWiz) deleteRecipe(recipeID int) error {
 
 func (d *dbWiz) getRecipeById(recipeID int) (Recipe, error) {
 	var recipe Recipe
-	var stepsString string
+	var ingredientsJSON string
+	var stepsJSON string
 
 	err := d.dbWizard.QueryRow("SELECT title, description, ingredients, steps FROM recipes WHERE recipe_id = $1", recipeID).
-		Scan(&recipe.Title, &recipe.Description, pq.Array(&recipe.Ingredients), &stepsString)
+		Scan(&recipe.Title, &recipe.Description, &ingredientsJSON, &stepsJSON)
 	if err != nil {
 		log.Printf("Error getting recipe from the database: %v\n", err)
 		return recipe, err
 	}
 
-	var steps []struct {
-		Step        int    `json:"step"`
-		Instruction string `json:"instruction"`
-	}
-
-	if err = json.Unmarshal([]byte(stepsString), &steps); err != nil {
-		log.Printf("Error decoding steps from JSON: %v\n", err)
+	// Декодирование JSON-строки ингредиентов в список структур
+	if err := json.Unmarshal([]byte(ingredientsJSON), &recipe.Ingredients); err != nil {
+		log.Printf("Error decoding ingredients from JSON: %v\n", err)
 		return recipe, err
 	}
 
-	// Присвоение структуры шагов рецепта
-	recipe.Steps = steps
+	// Декодирование JSON-строки шагов в список структур
+	if err := json.Unmarshal([]byte(stepsJSON), &recipe.Steps); err != nil {
+		log.Printf("Error decoding steps from JSON: %v\n", err)
+		return recipe, err
+	}
 
 	return recipe, nil
 }
