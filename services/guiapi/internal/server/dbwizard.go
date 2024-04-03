@@ -132,3 +132,14 @@ func (d *dbWiz) getRecipeById(recipeID int) (Recipe, error) {
 
 	return recipe, nil
 }
+
+func (d *dbWiz) addIngredient(ingredient *IngrNutritious) error {
+	_, err := d.dbWizard.Exec("INSERT INTO ingredients (name, calories_per_100g, proteins_per_100g, fats_per_100g, carbohydrates_per_100g) VALUES ($1, $2, $3, $4, $5)",
+		ingredient.Name, ingredient.CaloriesPer100g, ingredient.ProteinsPer100g, ingredient.FatsPer100g, ingredient.CarbohydratesPer100g)
+	if err != nil {
+		log.Printf("Error inserting ingredient into the database: %v\n", err)
+		return err
+	}
+
+	return nil
+}

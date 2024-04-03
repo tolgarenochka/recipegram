@@ -323,3 +323,40 @@ func (s *Server) getRecipe(ctx *fasthttp.RequestCtx) {
 func (s *Server) getRecipesList(ctx *fasthttp.RequestCtx) {
 
 }
+
+// IngrNutritious структура для представления данных об ингредиенте
+type IngrNutritious struct {
+	Name                 string  `json:"name"`
+	CaloriesPer100g      float64 `json:"calories_per_100g"`
+	ProteinsPer100g      float64 `json:"proteins_per_100g"`
+	FatsPer100g          float64 `json:"fats_per_100g"`
+	CarbohydratesPer100g float64 `json:"carbohydrates_per_100g"`
+}
+
+func (s *Server) addIngredient(ctx *fasthttp.RequestCtx) {
+	_, _, err := validateToken(ctx)
+	if err != nil {
+		log.Printf("Error validating token: %v\n", err)
+		ctx.Error("Unauthorized", fasthttp.StatusUnauthorized)
+		return
+	}
+
+	// Получение данных об ингредиенте из тела запроса
+	var ingredient IngrNutritious
+	if err := json.Unmarshal(ctx.PostBody(), &ingredient); err != nil {
+		log.Printf("Error decoding ingredient data: %v\n", err)
+		ctx.Error("Bad Request", fasthttp.StatusBadRequest)
+		return
+	}
+
+	// Добавление ингредиента в базу данных
+	if err := s.dbWizard.addIngredient(&ingredient); err != nil {
+		log.Printf("Error adding ingredient to the database: %v\n", err)
+		ctx.Error("Internal Server Error", fasthttp.StatusInternalServerError)
+		return
+	}
+
+	// Успешное добавление ингредиента
+	ctx.SetStatusCode(fasthttp.StatusCreated)
+	ctx.WriteString("Ingredient added successfully")
+}
