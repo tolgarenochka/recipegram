@@ -41,13 +41,15 @@ func (d *dbWiz) addRecipe(recipeData *Recipe, userID int) (int, error) {
 	// Преобразование списка ингредиентов в формат JSON
 	ingredientsJSON, err := json.Marshal(recipeData.Ingredients)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error marshal ingredients: %v\n", err)
+		return 0, err
 	}
 
 	// Преобразование списка шагов в формат JSON
 	stepsJSON, err := json.Marshal(recipeData.Steps)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error marshal steps: %v\n", err)
+		return 0, err
 	}
 
 	var id int
@@ -77,13 +79,15 @@ func (d *dbWiz) updateRecipe(recipeData *Recipe, recipeID int) error {
 	// Преобразование списка ингредиентов в формат JSON
 	ingredientsJSON, err := json.Marshal(recipeData.Ingredients)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error marshal Ingredients: %v\n", err)
+		return err
 	}
 
 	// Преобразование списка шагов в формат JSON
 	stepsJSON, err := json.Marshal(recipeData.Steps)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error marshal Steps: %v\n", err)
+		return err
 	}
 
 	_, err = d.dbWizard.Exec("UPDATE recipes SET title = $1, description = $2, ingredients = $3, steps = $4 WHERE recipe_id = $5",

@@ -38,7 +38,7 @@ func (s *Server) Run(ctx context.Context) error {
 		// Подписка на топик
 		partitionConsumer, err := s.consumer.ConsumePartition(topic, 0, sarama.OffsetNewest)
 		if err != nil {
-			log.Printf("Failed to subscribe to topic: %v\n", err)
+			log.Fatalf("Failed to subscribe to topic: %v\n", err)
 		}
 		defer partitionConsumer.Close()
 

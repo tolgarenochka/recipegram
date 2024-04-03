@@ -1,5 +1,6 @@
 package server
 
+// Todo: переделать выходхные знаяения в структуру
 func countNutriPerWeight(ingredients []Ingredient) (float64, float64, float64, float64, float64) {
 	var totalWeight, totalCarbs, totalFats, totalProteins, totalCcal float64
 

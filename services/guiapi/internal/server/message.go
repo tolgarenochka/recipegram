@@ -12,12 +12,6 @@ func (s *Server) sendMessageKafka(topic string, messageText string) error {
 
 	// Отправка сообщения
 	_, _, err := s.producer.SendMessage(message)
-	//// Отправка сообщения
-	//message := &kafka.Message{
-	//	TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-	//	Value:          messageText,
-	//}
-	//err := s.producer.Produce(message, nil)
 
 	return err
 }
