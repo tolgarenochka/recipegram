@@ -23,6 +23,10 @@ COPY . .
 
 RUN go build -tags musl -ldflags="-s -w" -o /app/nutri cmd/nutri.go
 
+FROM alpine AS final
+
+COPY --from=builder /app /app
+
 WORKDIR /app
 
 CMD ["./nutri"]

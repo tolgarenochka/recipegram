@@ -23,6 +23,11 @@ COPY . .
 
 RUN go build -tags musl -ldflags="-s -w" -o /app/guiapi cmd/guiapi.go
 
+
+FROM alpine AS final
+
+COPY --from=builder /app /app
+
 WORKDIR /app
 
 CMD ["./guiapi"]
