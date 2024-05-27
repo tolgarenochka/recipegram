@@ -56,3 +56,12 @@ services:
       - postgres
       - kafka
       - guiapi
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./services/guiapi/docs/swagger.json:/usr/share/nginx/html/swagger.json
+    environment:
+      URL: /swagger.json

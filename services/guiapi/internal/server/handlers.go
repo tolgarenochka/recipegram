@@ -22,6 +22,14 @@ type JWTClaims struct {
 	jwt.StandardClaims
 }
 
+// Auth
+// @Summary Auth user by login & password
+// @Produce json
+// @Param user body User true "User data"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /auth [post]
 func (s *Server) auth(ctx *fasthttp.RequestCtx) {
 	var userData User
 	if err := json.Unmarshal(ctx.PostBody(), &userData); err != nil {
@@ -69,6 +77,14 @@ type UserRegistration struct {
 	Password string `json:"password"`
 }
 
+// Register
+// @Summary Register a new user
+// @Produce json
+// @Param user body UserRegistration true "User data"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /reg [post]
 func (s *Server) reg(ctx *fasthttp.RequestCtx) {
 	var userData UserRegistration
 	if err := json.Unmarshal(ctx.PostBody(), &userData); err != nil {
@@ -140,6 +156,16 @@ type Recipe struct {
 	Steps       []Step       `json:"steps"`
 }
 
+// AddRecipe
+// @Summary Add a new recipe
+// @Produce json
+// @Param recipe body Recipe true "Recipe data"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /addRecipe [post]
+// @Security ApiKeyAuth
 func (s *Server) addRecipe(ctx *fasthttp.RequestCtx) {
 	// Проверка валидности токена
 	userID, _, err := validateToken(ctx)
@@ -179,6 +205,18 @@ func (s *Server) addRecipe(ctx *fasthttp.RequestCtx) {
 	ctx.Write(jsonResponse)
 }
 
+// EditRecipe
+// @Summary Edit an existing recipe
+// @Produce json
+// @Param recipeID path int true "Recipe ID"
+// @Param recipe body Recipe true "Recipe data"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /editRecipe/{recipeID} [post]
+// @Security ApiKeyAuth
 func (s *Server) editRecipe(ctx *fasthttp.RequestCtx) {
 	// Проверка валидности токена
 	userID, _, err := validateToken(ctx)
@@ -239,6 +277,17 @@ func (s *Server) editRecipe(ctx *fasthttp.RequestCtx) {
 	ctx.Write(jsonResponse)
 }
 
+// DeleteRecipe
+// @Summary Delete an existing recipe
+// @Produce json
+// @Param recipeID path int true "Recipe ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /deleteRecipe/{recipeID} [delete]
+// @Security ApiKeyAuth
 func (s *Server) deleteRecipe(ctx *fasthttp.RequestCtx) { // Проверка валидности токена
 	userID, _, err := validateToken(ctx)
 	if err != nil {
@@ -283,6 +332,16 @@ func (s *Server) deleteRecipe(ctx *fasthttp.RequestCtx) { // Проверка в
 	ctx.Write(jsonResponse)
 }
 
+// GetRecipe
+// @Summary Get a recipe by ID
+// @Produce json
+// @Param recipeID path int true "Recipe ID"
+// @Success 200 {object} Recipe
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /getRecipe/{recipeID} [get]
+// @Security ApiKeyAuth
 func (s *Server) getRecipe(ctx *fasthttp.RequestCtx) {
 	_, _, err := validateToken(ctx)
 	if err != nil {
@@ -333,6 +392,16 @@ type IngrNutritious struct {
 	CarbohydratesPer100g float64 `json:"carbohydrates_per_100g"`
 }
 
+// AddIngredient
+// @Summary Add a new ingredient
+// @Produce json
+// @Param ingredient body IngrNutritious true "Ingredient data"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /addIngredient [post]
+// @Security ApiKeyAuth
 func (s *Server) addIngredient(ctx *fasthttp.RequestCtx) {
 	_, _, err := validateToken(ctx)
 	if err != nil {

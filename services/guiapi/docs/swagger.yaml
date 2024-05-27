@@ -1,0 +1,343 @@
+basePath: /
+definitions:
+  internal_server.IngrNutritious:
+    properties:
+      calories_per_100g:
+        type: number
+      carbohydrates_per_100g:
+        type: number
+      fats_per_100g:
+        type: number
+      name:
+        type: string
+      proteins_per_100g:
+        type: number
+    type: object
+  internal_server.Ingredient:
+    properties:
+      name:
+        type: string
+      weight:
+        type: number
+    type: object
+  internal_server.Recipe:
+    properties:
+      description:
+        type: string
+      ingredients:
+        items:
+          $ref: '#/definitions/internal_server.Ingredient'
+        type: array
+      steps:
+        items:
+          $ref: '#/definitions/internal_server.Step'
+        type: array
+      title:
+        type: string
+    type: object
+  internal_server.Step:
+    properties:
+      instruction:
+        type: string
+      step:
+        type: integer
+    type: object
+  internal_server.User:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  internal_server.UserRegistration:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: guiapi:8080
+info:
+  contact: {}
+  description: Swagger API for Golang Project Recipegram
+  title: Recipegram Swagger API
+  version: "1.0"
+paths:
+  /addIngredient:
+    post:
+      parameters:
+      - description: Ingredient data
+        in: body
+        name: ingredient
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server.IngrNutritious'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add a new ingredient
+  /addRecipe:
+    post:
+      parameters:
+      - description: Recipe data
+        in: body
+        name: recipe
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server.Recipe'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add a new recipe
+  /auth:
+    post:
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Auth user by login & password
+  /deleteRecipe/{recipeID}:
+    delete:
+      parameters:
+      - description: Recipe ID
+        in: path
+        name: recipeID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete an existing recipe
+  /editRecipe/{recipeID}:
+    post:
+      parameters:
+      - description: Recipe ID
+        in: path
+        name: recipeID
+        required: true
+        type: integer
+      - description: Recipe data
+        in: body
+        name: recipe
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server.Recipe'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Edit an existing recipe
+  /getRecipe/{recipeID}:
+    get:
+      parameters:
+      - description: Recipe ID
+        in: path
+        name: recipeID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_server.Recipe'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a recipe by ID
+  /reg:
+    post:
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server.UserRegistration'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
