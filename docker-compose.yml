@@ -12,6 +12,15 @@ services:
       - ./db/init:/docker-entrypoint-initdb.d
       - ./db/data/postgres-data:/var/lib/postgresql/data
 
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    ports:
+      - "9187:9187"
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:1q2w3e4r5t@postgres:5432/postgres?sslmode=disable"
+    depends_on:
+      - postgres
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
@@ -29,6 +38,15 @@ services:
       - KAFKA_JMX_HOSTNAME:kafka
     depends_on:
       - zookeeper
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    ports:
+      - "9308:9308"
+    environment:
+      - KAFKA_SERVER=kafka:9092
+    depends_on:
+      - kafka
 
   kafka-ui:
     container_name: kafka-ui
@@ -65,3 +83,25 @@ services:
       - ./services/guiapi/docs/swagger.json:/usr/share/nginx/html/swagger.json
     environment:
       URL: /swagger.json
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+volumes:
+  grafana-storage:
