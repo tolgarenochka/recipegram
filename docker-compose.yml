@@ -84,6 +84,15 @@ services:
     environment:
       URL: /swagger.json
 
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8083:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - guiapi
+
   prometheus:
     image: prom/prometheus:latest
     ports:
